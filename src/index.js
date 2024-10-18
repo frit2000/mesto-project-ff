@@ -1,10 +1,13 @@
+import './pages/index.css';
+import {initialCards} from './cards.js';
+
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
 
 // @todo: DOM узлы
 const placeList = document.querySelector(".places__list");
 
-// @todo: Функция создания карточки
+// @todo: Функция создания карточки5
 function createCard(card, deleteCard) {
   const placeItem = cardTemplate.querySelector(".places__item").cloneNode(true);
   placeItem.querySelector(".card__title").textContent = card.name;
