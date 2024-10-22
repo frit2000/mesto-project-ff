@@ -1,5 +1,6 @@
 import './pages/index.css';
-import {initialCards, createCard, deleteCard, addLike, clickPicture} from './components/cards.js';
+import {initialCards} from './components/cards.js';
+import {createCard, deleteCard, addLike} from './components/card.js';
 import {openModal, closeModal} from './components/modal.js';
 
 
@@ -12,6 +13,8 @@ const cardImage = document.querySelector(".card__image");
 const modalEdit = document.querySelector(".popup_type_edit");
 const modalAdd = document.querySelector(".popup_type_new-card");
 
+const modalPicture = document.querySelector(".popup_type_image");
+const largePicture = modalPicture.querySelector(".popup__image");
 
 const profileName = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
@@ -24,6 +27,7 @@ const formElementAdd = document.querySelector("form[name='new-place']");
 const cardName = formElementAdd.querySelector("input[name='place-name']");
 const cardLink = formElementAdd.querySelector("input[name='link']");
 
+const popups = document.querySelectorAll('.popup');
 
 initialCards.forEach((element) => {
   placeList.append(createCard(element, deleteCard, addLike, clickPicture));
@@ -34,7 +38,35 @@ editButton.addEventListener('click', function(){
   fillPopupEdit();
 });
 
+modalEdit.addEventListener
+
+addButton.addEventListener('click', function(){
+  openModal(modalAdd);
+});
+
+
+popups.forEach((popup) => {
+  popup.addEventListener('click', (evt) => {
+    //Благодаря всплытию при клике на крестик мы поймаем событие на элементе попапа.
+    //Проверяем что кликнули на оверлей или на крестик.
+    if (evt.target === evt.currentTarget || evt.target.classList.contains('popup__close')){
+      //В currentTarget у нас всегда будет элемент на котором мы поймали событие, т.е. попап.
+      closeModal(popup);
+    }
+  });
+});
+
+
 formElementEdit.addEventListener('submit', handleFormSubmitEdit);
+
+formElementAdd.addEventListener('submit', handleFormSubmitAdd);
+
+
+function clickPicture(name, link) {
+  openModal(modalPicture);
+  largePicture.src = link;
+  largePicture.alt = name;
+}
 
 function fillPopupEdit() {
   nameInput.value = profileName.textContent;
@@ -48,8 +80,6 @@ function handleFormSubmitEdit(evt) {
   closeModal(modalEdit);
 }
 
-formElementAdd.addEventListener('submit', handleFormSubmitAdd);
-
 function handleFormSubmitAdd(evt) {
   evt.preventDefault();
   const element =
@@ -61,13 +91,6 @@ function handleFormSubmitAdd(evt) {
   closeModal(modalAdd);
   formElementAdd.reset();
 }
-
-addButton.addEventListener('click', function(){
-  openModal(modalAdd);
-});
-
-
-
 
 
 
