@@ -1,8 +1,9 @@
 import './pages/index.css';
+import {openModal, closeModal}  from './components/modal.js';
 import {initialCards} from './components/cards.js';
 import {createCard, deleteCard, addLike} from './components/card.js';
-import {openModal, closeModal} from './components/modal.js';
-
+// import { isObject } from 'core-js/core/object';
+import {enableValidation} from './components/validation.js';
 
 // @todo: DOM узлы
 const placeList = document.querySelector(".places__list");
@@ -33,15 +34,32 @@ initialCards.forEach((element) => {
   placeList.append(createCard(element, deleteCard, addLike, clickPicture));
 });
 
+
+const hideInitialError = (popupWindow) => {
+  console.log('пытаемся спрятать ошибки');
+  const popupInputs = Array.from(popupWindow.querySelectorAll('.popup__input'));
+  console.log('массив инпутов', popupInputs);
+  popupInputs.forEach((inputElement) => {
+    const errorElement = popupWindow.querySelector(`.${inputElement.id}-error`);
+    console.log('поле',inputElement, 'ошибка', errorElement );
+    inputElement.classList.remove('popup__input_type_error');
+    errorElement.classList.remove('popup__error_visible');
+    errorElement.textContent = '';
+  })
+
+}
+
 editButton.addEventListener('click', function(){
   openModal(modalEdit);
   fillPopupEdit();
+  hideInitialError(modalEdit);
 });
 
-modalEdit.addEventListener
+// modalEdit.addEventListener
 
 addButton.addEventListener('click', function(){
   openModal(modalAdd);
+  hideInitialError(modalAdd);
 });
 
 
@@ -52,6 +70,8 @@ popups.forEach((popup) => {
     if (evt.target === evt.currentTarget || evt.target.classList.contains('popup__close')){
       //В currentTarget у нас всегда будет элемент на котором мы поймали событие, т.е. попап.
       closeModal(popup);
+      formElementAdd.reset();
+      formElementEdit.reset();
     }
   });
 });
@@ -93,6 +113,16 @@ function handleFormSubmitAdd(evt) {
 }
 
 
+formElementEdit.addEventListener('submit', function(evt) {
+  evt.preventDefault();
+});
 
-
+enableValidation({
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
+});
 
