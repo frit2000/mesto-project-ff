@@ -9,6 +9,28 @@
   margin: 0 29px 0 0;
 }
 
+.profile__image:hover {
+  position: relative;
+}
+
+.profile__image:hover::before {
+  content: '';
+  position: absolute;
+  background: rgb(0,0,0,0.4);
+  width: 120px;
+  height: 120px;
+  inset: 0;
+  cursor: pointer;
+}
+
+.profile__image:hover::after {
+  content: url('../../../images/pensil.svg');
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  inset: 47px 47px;
+}
+
 @media screen and (max-width: 740px) {
   .profile__image {
     margin: 0 10px 0 0;
