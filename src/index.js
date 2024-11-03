@@ -1,16 +1,16 @@
 import './pages/index.css';
-import {openModal, closeModal}  from './components/modal.js';
+import {openModal, closeModal, hideInitialError}  from './components/modal.js';
 // import {initialCards} from './components/cards.js';
-import {createCard, deleteCard, toggleLike} from './components/card.js';
+import {createCard, deleteCard} from './components/card.js';
 import {enableValidation} from './components/validation.js';
-import {getInitialCards} from './components/api.js';
+import {getInitialCards, getMyProfile, patchMyProfile, placeNewCard, patchMyAvatar, renderLoading, addLike, deleteLike} from './components/api.js';
 
 // @todo: DOM узлы
 const placeList = document.querySelector(".places__list");
 const editButton = document.querySelector(".profile__edit-button");
 const addButton = document.querySelector(".profile__add-button");
 const cardImage = document.querySelector(".card__image");
-const avatar = document.querySelector(".profile__image");
+const editAvatar = document.querySelector(".profile__image");
 
 
 const modalEdit = document.querySelector(".popup_type_edit");
@@ -24,7 +24,6 @@ const profileName = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const profileImage = document.querySelector(".profile__image");
 
-
 const formElementEdit = document.querySelector("form[name='edit-profile']");
 const nameInput = formElementEdit.querySelector("input[name='name']");
 const jobInput = formElementEdit.querySelector("input[name='description']");
@@ -37,71 +36,62 @@ const formElementEditAvatar = document.querySelector("form[name='avatar']");
 const avatarLink = formElementEditAvatar.querySelector("input[name='avatar-link']");
 
 const popups = document.querySelectorAll('.popup');
+const popupButton = document.querySelector('.popup__button');
 
-// получаем карточки с сервера
-
-
-getInitialCards()
-  .then((result) => {
-    result.forEach((element) => {
-      placeList.append(createCard(element, deleteCard, toggleLike, clickPicture));
-    });
-  });
-
-// fetch('https://nomoreparties.co/v1/wff-cohort-25/cards', {
-//   headers: {
-//     authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3'
-//   }
-// })
-//   .then(res => res.json())
-//   .then((result) => {
-//     result.forEach((element) => {
-//       placeList.append(createCard(element, deleteCard, toggleLike, clickPicture));
-//     });
-//   });
-
-// получаю свой профиль с сервера
-fetch('https://nomoreparties.co/v1/wff-cohort-25/users/me', {
-  headers: {
-    authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-    'Content-Type': 'application/json'
-   }
-})
-  .then( res => res.json())
-  .then ((result) => {
-    profileName.textContent = result.name;
-    profileDescription.textContent = result.about;
-    profileImage.setAttribute('style', `background-image: url(${result.avatar})`)
-  })
-
-const hideInitialError = (popupWindow) => {
-  const popupInputs = Array.from(popupWindow.querySelectorAll('.popup__input'));
-  popupInputs.forEach((inputElement) => {
-    const errorElement = popupWindow.querySelector(`.${inputElement.id}-error`);
-    inputElement.classList.remove('popup__input_type_error');
-    errorElement.classList.remove('popup__error_visible');
-    errorElement.textContent = '';
-  })
+const clickPicture = (name, link) => {
+  openModal(modalPicture);
+  largePicture.src = link;
+  largePicture.alt = name;
 }
 
-editButton.addEventListener('click', function(){
-  openModal(modalEdit);
-  fillPopupEdit();
-  hideInitialError(modalEdit);
+//получаю карточки и профиль с сервера
+Promise.all([getInitialCards(), getMyProfile()])
+  .then((results) => {
+    // обработка карточек
+    results[0].forEach((element) => {
+      placeList.append(createCard(element, deleteCard, toggleLike, clickPicture));
+    });
+    // обработка профиля
+    profileName.textContent = results[1].name;
+    profileDescription.textContent = results[1].about;
+    profileImage.setAttribute('style', `background-image: url(${results[1].avatar})`)
+  })
+
+//запускаем функцию проверки валидности полей ввода
+enableValidation({
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
 });
 
+//редактирование профиля
+editButton.addEventListener('click', function(){
+  nameInput.value = profileName.textContent;
+  jobInput.value = profileDescription.textContent;
+  openModal(modalEdit);
+  // hideInitialError(modalEdit);
+});
+formElementEdit.addEventListener('submit', handleFormSubmitEdit);
+
+//редактирование аватара
+editAvatar.addEventListener('click', function(){
+  openModal(modalAvatar);
+  hideInitialError(modalAvatar);
+});
+formElementEditAvatar.addEventListener('submit', handleFormSubmitEditAvatar);
+
+//добавление карточки
 addButton.addEventListener('click', function(){
   openModal(modalAdd);
   hideInitialError(modalAdd);
 });
-
-avatar.addEventListener('click', function(){
-  openModal(modalAvatar);
-  hideInitialError(modalAvatar);
-});
+formElementAdd.addEventListener('submit', handleFormSubmitAdd);
 
 
-
+//закрытие модальных окон при нажатии мимо окна или на крестик
 popups.forEach((popup) => {
   popup.addEventListener('click', (evt) => {
     //Благодаря всплытию при клике на крестик мы поймаем событие на элементе попапа.
@@ -115,56 +105,19 @@ popups.forEach((popup) => {
   });
 });
 
-formElementEdit.addEventListener('submit', handleFormSubmitEdit);
-
-formElementAdd.addEventListener('submit', handleFormSubmitAdd);
-
-formElementEditAvatar.addEventListener('submit', handleFormSubmitEditAvatar);
-
-function clickPicture(name, link) {
-  openModal(modalPicture);
-  largePicture.src = link;
-  largePicture.alt = name;
-}
-
-function fillPopupEdit() {
-  nameInput.value = profileName.textContent;
-  jobInput.value = profileDescription.textContent;
-}
-
 function handleFormSubmitEdit(evt) {
   evt.preventDefault();
   profileName.textContent = nameInput.value;
   profileDescription.textContent = jobInput.value;
-  fetch('https://nomoreparties.co/v1/wff-cohort-25/users/me', {
-    method: 'PATCH',
-    headers: {
-      authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: nameInput.value,
-      about: jobInput.value
-    })
-  })
+  renderLoading(true, popupButton);
+  patchMyProfile(nameInput.value, jobInput.value, popupButton)
   closeModal(modalEdit);
 }
 
 function handleFormSubmitAdd(evt) {
   evt.preventDefault();
-  fetch ('https://nomoreparties.co/v1/wff-cohort-25/cards', {
-    method: 'POST',
-    headers: {
-      authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: cardName.value,
-      link: cardLink.value,
-      likes: []
-    })
-  })
-    .then( res => res.json())
+  renderLoading(true, popupButton);
+  placeNewCard(cardName.value, cardLink.value, popupButton)
     .then ((result) => {
       placeList.prepend(createCard(result, deleteCard, toggleLike, clickPicture));
     })
@@ -172,35 +125,29 @@ function handleFormSubmitAdd(evt) {
   formElementAdd.reset();
 }
 
-
 function handleFormSubmitEditAvatar(evt) {
   evt.preventDefault();
   profileImage.setAttribute('style', `background-image: url(${avatarLink.value})`)
-  fetch('https://nomoreparties.co/v1/wff-cohort-25/users/me/avatar', {
-    method: 'PATCH',
-    headers: {
-      authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      avatar: avatarLink.value
-    })
-  })
+  renderLoading(true, popupButton);
+  patchMyAvatar(avatarLink.value, popupButton);
   closeModal(modalAvatar);
   formElementEditAvatar.reset();
 }
 
-formElementEdit.addEventListener('submit', function(evt) {
-  evt.preventDefault();
-});
-
-enableValidation({
-  formSelector: '.popup__form',
-  inputSelector: '.popup__input',
-  submitButtonSelector: '.popup__button',
-  inactiveButtonClass: 'popup__button_disabled',
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__error_visible'
-});
+function toggleLike(heart, cardId, likeCount) {
+  if (!heart.classList.contains('card__like-button_is-active')){
+    heart.classList.add('card__like-button_is-active');
+    addLike(cardId)
+      .then ((result) => {
+        likeCount.textContent = result.likes.length;
+      })
+  } else {
+    heart.classList.remove('card__like-button_is-active')
+    deleteLike(cardId)
+      .then ((result) => {
+        likeCount.textContent = result.likes.length;
+      })
+  }
+}
 
 

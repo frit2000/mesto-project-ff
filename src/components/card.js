@@ -45,35 +45,6 @@ export function deleteCard(card, cardId) {
   })
 }
 
-export function toggleLike(heart, cardId, likeCount) {
-  if (!heart.classList.contains('card__like-button_is-active')){
-    heart.classList.add('card__like-button_is-active')
-    fetch (`https://nomoreparties.co/v1/wff-cohort-25/cards/likes/${cardId}`, {
-      method: 'PUT',
-      headers: {
-        authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-        'Content-Type': 'application/json'
-      }
-    })
-    .then( res => res.json())
-    .then ((result) => {
-      likeCount.textContent = result.likes.length;
-    })
-  } else {
-    heart.classList.remove('card__like-button_is-active')
-    fetch (`https://nomoreparties.co/v1/wff-cohort-25/cards/likes/${cardId}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: 'b14aa255-c572-4615-8bd2-84d12621d1a3',
-        'Content-Type': 'application/json'
-      }
-    })
-    .then( res => res.json())
-    .then ((result) => {
-      likeCount.textContent = result.likes.length;
-    })
-  }
 
-}
 
 
