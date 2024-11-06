@@ -1,3 +1,5 @@
+import {checkResponse, renderLoading} from './utils.js';
+
 const config = {
   baseUrl: 'https://nomoreparties.co/v1/wff-cohort-25',
   headers: {
@@ -6,38 +8,24 @@ const config = {
   }
 }
 
-export const getInitialCards = () => {
-  return fetch(`${config.baseUrl}/cards`, {
-    headers: config.headers
-  })
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+function request(endpoint, options) {
+  return fetch(`${config.baseUrl}${endpoint}`, options).then(checkResponse)
 }
 
-export const getMyProfile = () => {
-  return fetch(`${config.baseUrl}/users/me`, {
+export const getInitialCards = () => {
+  return request(`/cards`, {
     headers: config.headers
   })
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+s}
+
+export const getMyProfile = () => {
+  return request(`/users/me`, {
+    headers: config.headers
+  })
 }
 
 export const patchMyProfile = (name, about, popupButton) => {
-  return fetch(`${config.baseUrl}/users/me`, {
+  return request(`/users/me`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
@@ -45,21 +33,10 @@ export const patchMyProfile = (name, about, popupButton) => {
       about: about
     })
   }
-)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => renderLoading(true, popupButton))
-}
+)}
 
 export const placeNewCard = (name, link, popupButton) => {
-  return fetch(`${config.baseUrl}/cards`, {
+  return request(`/cards`, {
     method: 'POST',
     headers: config.headers,
     body: JSON.stringify({
@@ -67,82 +44,39 @@ export const placeNewCard = (name, link, popupButton) => {
       link: link,
       likes: []
     })
-  }
-)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => renderLoading(true, popupButton))
+  })
 }
 
 export const patchMyAvatar = (avatar, popupButton) => {
-  return fetch(`${config.baseUrl}/users/me/avatar`, {
+  return request(`/users/me/avatar`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
       avatar: avatar
     })
   }
-)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => {
-      renderLoading(false, popupButton);
-    })
+)}
+
+export const deleteCardFromServer = (cardId) => {
+  return request(`/cards/${cardId}`, {
+    method: 'DELETE',
+    headers: config.headers,
+  })
 }
 
 export const addLike = (cardId) => {
-  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+  return request(`/cards/likes/${cardId}`, {
     method: 'PUT',
     headers: config.headers,
-  }
-)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
+  })
 }
 
 export const deleteLike = (cardId) => {
-  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+  return request(`/cards/likes/${cardId}`, {
     method: 'DELETE',
     headers: config.headers,
-  }
-)
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
+  })
 }
 
-export const renderLoading = (isLoading, button) => {
-  if (isLoading) {
-    button.textContent = 'Сохранение...';
-  } else {
-    button.textContent = 'Сохранить';
-  }
-}
+
 

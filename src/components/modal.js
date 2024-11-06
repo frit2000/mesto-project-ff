@@ -1,13 +1,18 @@
 export function openModal (popupDOM){
-  popupDOM.classList.add('popup_is-opened');
   popupDOM.classList.add('popup_is-animated');
+  setTimeout(() => {
+    popupDOM.classList.add('popup_is-opened');
+  }, 1)
+  popupDOM.querySelector('.popup__form').reset();
 
   document.addEventListener('keyup', closeEscape);
 }
 
-function closeEscape(evt) {
+function closeEscape (evt) {
   if (evt.key === 'Escape') {
-    closeModal(popupDOM);
+    const openedModal = document.querySelector('.popup_is-opened');
+    console.log('элемент', openedModal);
+    closeModal(openedModal);
   }
 }
 
@@ -16,14 +21,31 @@ export function closeModal(popupDOM){
   document.removeEventListener('keyup', closeEscape);
 }
 
-export function hideInitialError (popupWindow) {
-  const popupInputs = Array.from(popupWindow.querySelectorAll('.popup__input'));
-  popupInputs.forEach((inputElement) => {
-    const errorElement = popupWindow.querySelector(`.${inputElement.id}-error`);
-    inputElement.classList.remove('popup__input_type_error');
-    errorElement.classList.remove('popup__error_visible');
-    errorElement.textContent = '';
-  })
-}
+
+
+
+
+
+// export function openModal (popupDOM){
+//   popupDOM.classList.add('popup_is-animated');
+//   setTimeout(() => {
+//     popupDOM.classList.add('popup_is-opened');
+//   }, 1)
+
+//   document.addEventListener('keyup', closeEscape);
+
+// function closeEscape (evt) {
+//     if (evt.key === 'Escape') {
+//       closeModal(popupDOM);
+//       document.removeEventListener('keyup', closeEscape);
+//     }
+//   }
+// }
+
+// export function closeModal(popupDOM){
+//   popupDOM.classList.remove('popup_is-opened');
+// }
+
+
 
 

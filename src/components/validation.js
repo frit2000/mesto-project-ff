@@ -46,6 +46,7 @@ const hasInvalidInput = (inputList) => {
   })
 };
 
+
 const toggleButtonState = (inputList, buttonElement, params) => {
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
@@ -63,3 +64,16 @@ export const enableValidation = (params) => {
   });
 };
 
+
+export const clearValidation = (formElement, params) => {
+  const inputList = Array.from(formElement.querySelectorAll(params.inputSelector));
+  const buttonElement = formElement.querySelector(params.submitButtonSelector);
+  inputList.forEach((inputElement) => {
+    const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
+    inputElement.classList.remove('popup__input_type_error');
+    errorElement.classList.remove('popup__error_visible');
+    errorElement.textContent = '';
+  })
+
+  toggleButtonState(inputList, buttonElement, params);
+}
