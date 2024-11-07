@@ -3,7 +3,11 @@ export function openModal (popupDOM){
   setTimeout(() => {
     popupDOM.classList.add('popup_is-opened');
   }, 1)
-  popupDOM.querySelector('.popup__form').reset();
+
+  if (popupDOM.querySelector('.popup__form')) {
+    popupDOM.querySelector('.popup__form').reset();
+  }
+
 
   document.addEventListener('keyup', closeEscape);
 }
