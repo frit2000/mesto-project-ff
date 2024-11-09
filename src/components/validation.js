@@ -68,9 +68,10 @@ export const enableValidation = (params) => {
 export const clearValidation = (formElement, params) => {
   const inputList = Array.from(formElement.querySelectorAll(params.inputSelector));
   const buttonElement = formElement.querySelector(params.submitButtonSelector);
+  console.log("форма", formElement);
+  formElement.querySelector(params.formSelector).reset();
   inputList.forEach((inputElement) => {
     hideInputError (formElement, inputElement, params);
   })
-  buttonElement.disabled = true;
-  buttonElement.classList.add(params.inactiveButtonClass);
+  toggleButtonState(inputList, buttonElement, params);
 }

@@ -127,8 +127,6 @@ popups.forEach((popup) => {
 
 function handleFormSubmitEdit(evt) {
   evt.preventDefault();
-      profileName.textContent = nameInput.value;
-      profileDescription.textContent = jobInput.value;
   renderLoading(true, popupButtonEdit);
   patchMyProfile(nameInput.value, jobInput.value, popupButtonEdit)
     .then ((res) => {
